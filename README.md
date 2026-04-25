@@ -36,15 +36,15 @@ The dense-flow kernel `com1DFA` is a thickness-integrated SPH-style particle–g
 
 $$\tau^{(b)} = \mu \sigma^{(b)} + \frac{g}{\xi} \rho \bar{u}^2$$
 
-The Voellmy parameters μ and ξ are passed in per-scenario from `params.json`. Forest is implemented as a com1DFA *resistance area* — particles passing through it experience added drag (Christen et al. 2010). com1DFA also supports samosAT-family friction models (Sampl & Zwinger 2004), but those use internal volume-keyed Austrian calibrations that ignore externally-supplied μ/ξ, so we stay on Voellmy.
+The Voellmy parameters μ and ξ are passed in per-scenario from `params.json`. Forest is implemented as a com1DFA *resistance area*, particles passing through it experience added drag (Christen et al. 2010). com1DFA also supports samosAT-family friction models (Sampl & Zwinger 2004), but those use internal volume-keyed Austrian calibrations that ignore externally-supplied μ/ξ, so we chose to use Voellmy.
 
-Reach is defined as flow depth ≥ 0.1 m, following the AvaFrame edge convention. An optional minimum velocity gate is available in config.
+Reach is defined as flow depth ≥ 0.1 m, following the AvaFrame edge convention. An optional minimum velocity gate is available in the config.
 
 ### Entrainment: α–β corridor with flow-accumulation fallback
 
 Each scenario's entrainment polygon is auto-detected by tracing a steepest-descent flowline downhill from the release centroid (D8, terminating at <3° rolling slope) and computing an α-angle stopping point following the **McClung & Lied (1987)** statistical runout model — β = first point where the slope-from-start drops below 10°, α = β − 5°. The flowline buffered to a corridor and truncated at α gives the entrainment polygon. If α falls outside the plausible range [15°, 45°], the pipeline falls back to a flow-accumulation buffer (Horton et al. 2013).
 
-Entrainment depth is currently a constant (0.15 m default), defensible for dry surface-slab releases per the Vallée de la Sionne calibrations of **Vera Valero et al. (2016)** and **Bartelt et al. (2018)**. A planned upgrade is to drive entrainment depth from snowpack-state output.
+Entrainment depth is currently a constant (0.15 m default). Selected from dry surface-slab releases per the Vallée de la Sionne calibrations of **Vera Valero et al. (2016)** and **Bartelt et al. (2018)**. A to-do is to drive entrainment depth from snowpack-state output.
 
 ### Probability stacking
 
