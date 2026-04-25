@@ -1,0 +1,113 @@
+# ============================================================================
+# Avalanche Runout Envelope - Global Configuration
+# ============================================================================
+# Per-scenario parameters (mu, xi, rho, release depth, release polygon)
+# live in each scenario folder under inputs/. This file holds globals only.
+#
+# References for default values:
+#   - Entrainment depth: Vera Valero et al. (2016), Bartelt et al. (2018)
+#     Vallée de la Sionne calibrations. Dry surface slab: 0.3 m.
+#   - Reach threshold: flow depth >= 0.01 m (com1DFA edge convention).
+#   - Contour levels: align with FLO-2D debris flow hazard zoning
+#     (Zhang et al. 2024) and Canadian Geotechnical Colloquium
+#     (Hungr 2014) runout exceedance practice.
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# Paths (relative to project root)
+# ----------------------------------------------------------------------------
+paths:
+  scenarios_dir: /home/val/SNOWPACK_Runout/scenarios/
+  outputs_dir: /home/val/SNOWPACK_Runout/outputs/20260424/
+  dem: /home/val/SNOWPACK_Runout/data/DEM/LittleProfessorDEM_ESPG6342.tif
+  forest: /home/val/SNOWPACK_Runout/data/canopy/LittleProfessor_binaryCanopy.shp
+  road: /home/val/SNOWPACK_Runout/data/road/cdot_US6_LP_LittleProfessor.shp
+
+# ----------------------------------------------------------------------------
+# com1DFA simulation settings
+# ----------------------------------------------------------------------------
+com1dfa:
+  mesh_cell_size_m: 1.0          # 1 m to match user's high-res DEM (slow but accurate)
+  friction_model: Voellmy        # uses per-scenario mu/xi from params.json directly.
+                                 # alternatives: 'samosATAuto' (volume-keyed Austrian
+                                 # calibration; ignores params.json mu/xi)
+  sim_type: ent                  # 'ent' = with entrainment; 'null' = without
+  stop_crit: 0.01                # fraction of initial kinetic energy
+  result_types:                   # peak rasters com1DFA will write
+    - ppr                         # peak pressure
+    - pft                         # peak flow thickness
+    - pfv                         # peak flow velocity
+    - pta                         # peak travel angle
+
+
+# ----------------------------------------------------------------------------
+# Entrainment (v1: constant depth, dry surface slab release)
+# See docs/entrainment_notes.md for literature grounding and planned upgrades.
+# ----------------------------------------------------------------------------
+entrainment:
+  mode: constant                 # v1 only supports 'constant'
+  depth_m: 0.15                  # dry surface slab; Vera Valero / Bartelt
+  ent_ero_energy_jkg: 5000       # com1DFA entrainment energy (Swiss calibration)
+
+  # Auto-detection of entrainment area (polygon along avalanche track)
+  auto_detect:
+    primary_method: alpha_beta
+    alpha_beta:
+      min_alpha_deg: 15          # if computed alpha outside this range,
+      max_alpha_deg: 45          #   fall back to flow-accumulation
+    flow_accumulation:
+      buffer_m: 50               # corridor width on each side of flowline
+      min_slope_deg: 15          # truncate entrainment where slope < this
+
+
+# ----------------------------------------------------------------------------
+# Reach detection (per-scenario binary mask)
+# Literature: "did the flow get here" uses flow-depth edge, not impact threshold.
+# ----------------------------------------------------------------------------
+reach:
+  flow_depth_threshold_m: 0.1   # com1DFA edge convention
+  min_velocity_ms: 0.0           # set > 0 to also require motion at threshold
+
+
+# ----------------------------------------------------------------------------
+# Probability / envelope construction
+# ----------------------------------------------------------------------------
+probability:
+  contour_levels: [0.05, 0.25, 0.50, 0.75, 1.00]
+  envelope_min_probability: 0.05 # P >= this defines the outer envelope
+
+
+# ----------------------------------------------------------------------------
+# Road analysis
+# ----------------------------------------------------------------------------
+road:
+  # Centerline is a polyline; "reached road" = reach mask intersecting
+  # a buffer around the centerline. For v1, buffer = one DEM cell (1 m).
+  buffer_m: 1.0
+
+  # Chainage origin: which end of the polyline is chainage = 0?
+  # Options: 'far_from_release' (end farthest from release centroid)
+  #          'first_vertex'      (first coordinate in the polyline)
+  #          'last_vertex'       (last coordinate in the polyline)
+  chainage_origin: far_from_release
+
+
+# ----------------------------------------------------------------------------
+# Execution
+# ----------------------------------------------------------------------------
+execution:
+  parallel: true                  # run scenarios in parallel via multiprocessing
+  max_workers: 4                  # null = use cpu_count
+  abort_on_crs_mismatch: true     # v1 requires all inputs in same CRS
+
+
+# ----------------------------------------------------------------------------
+# Output products
+# ----------------------------------------------------------------------------
+output:
+  cog: true                       # write Cloud-Optimized GeoTIFFs
+  probability_colormap: viridis
+  report_plots_dpi: 120
+  viewer_basemap: hillshade       # 'hillshade' = render DEM as basemap (offline-safe).
+                                  # OSM tile providers are blocked when accessed
+                                  # without a Referer header, so we render our own.

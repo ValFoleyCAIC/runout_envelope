@@ -1,0 +1,2 @@
+scenario_id,mu,xi,rho_kgm3,release_volume_m3,runout_max_m,peak_velocity_ms,peak_flow_depth_m,peak_pressure_kpa,reach_area_m2,reached_road,distance_to_road_m,depth_at_road_m,velocity_at_road_ms,chainage_m,entrainment_method,entrainment_area_m2
+scenario_001,0.155,1500.0,300.5,3121.7,822.4,21.03,3.21,0.13,78747.0,True,0.0,0.1,0.24,442.3,alpha_beta,122810.61846233041

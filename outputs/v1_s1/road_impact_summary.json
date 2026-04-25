@@ -1,0 +1,22 @@
+{
+  "n_scenarios": 1,
+  "n_reached": 1,
+  "fraction_reached": 1.0,
+  "wilson_95_ci": [
+    0.2065,
+    1.0
+  ],
+  "impact_points": [
+    {
+      "scenario": "scenario_001",
+      "xy": [
+        424836.85422978445,
+        4388384.989388143
+      ],
+      "depth_m": 0.10394568914180424,
+      "velocity_ms": 0.24296994547165268,
+      "chainage_m": 442.2664358616182
+    }
+  ],
+  "nearest_miss": null
+}
