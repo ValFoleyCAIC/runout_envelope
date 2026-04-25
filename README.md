@@ -52,17 +52,17 @@ Each scenario produces a binary reach raster Bᵢ(x), and the ensemble probabili
 
 $$P(x) = \frac{1}{N} \sum_{i=1}^{N} B_i(x)$$
 
-This is the indicator-function definition formalized by **Hyman, Bevilacqua, & Bursik (2019)** for probabilistic hazard maps. The probability at each cell is interpretable as P(reach | this set of plausible scenarios) — explicitly **conditional**, not annual. Frequency information would have to come from outside the model. AvaFrame's `ana4Stats.probAna` module follows the same stacking convention.
+This is the indicator-function definition formalized by **Hyman, Bevilacqua, & Bursik (2019)** for probabilistic hazard maps. The probability at each cell is interpretable as P(reach | this set of plausible scenarios), explicitly **conditional**, not annual. Frequency information would have to come from outside the model. AvaFrame's `ana4Stats.probAna` module follows the same stacking convention.
 
 The outer envelope is the polygonization of P ≥ 0.05 (configurable). Contours are drawn at the levels in `config.yaml` (default: 0.05, 0.25, 0.50, 0.75, 1.00). The most-likely-path is a skeleton (medial axis via Zhang-Suen thinning) of the P ≥ 0.5 region.
 
 ### Confidence intervals on small ensembles
 
-For "N of M scenarios reached the road" we report a **Wilson score 95% CI** rather than a normal-approximation one — Wilson is well-behaved at small N and at edge cases (k=0 or k=N) where the normal interval degenerates. With N=20 our probability granularity is 5% and CI half-widths on low-P contours are wide; reported CIs make this explicit.
+For "N of M scenarios reached the road" we report a **Wilson score 95% CI** rather than a normal-approximation one — Wilson is well-behaved at small N and at edge cases (k=0 or k=N) where the normal interval degenerates. With N=20, our probability granularity is 5%, and CI half-widths on low-P contours are wide; the reported CIs make this explicit.
 
 ### Viewer
 
-The viewer is a single self-contained `viewer.html`. Folium is initialized with `tiles=None` (no OSM dependency, no referer-policy errors), and the basemap is a hillshade computed from the project DEM via Horn's algorithm (matplotlib `LightSource`, NW sun at 45°), reprojected to WGS84 and embedded as a base64 PNG image overlay. The probability raster sits on top with sqrt-scaled alpha. Per-scenario release polygons, steepest-descent flowpaths, and reach polygons are each toggleable.
+The viewer is a single self-contained `viewer.html`. Folium is initialized with `tiles=None`, and the basemap is a hillshade computed from the project DEM via Horn's algorithm (matplotlib `LightSource`, NW sun at 45°), reprojected to WGS84 and embedded as a base64 PNG image overlay. The probability raster sits on top with sqrt-scaled alpha. Per-scenario release polygons, steepest-descent flowpaths, and reach polygons are each toggleable.
 
 ## References
 
@@ -119,10 +119,10 @@ The "run an ensemble, stack the indicator functions, polygonize the result" patt
 
 The shared mathematical structure — propagate a parameter PDF through a deterministic mapping, integrate the indicator against the PDF to get cell-wise impact probability — is detailed in **Hyman, Bevilacqua, & Bursik (2019)**, which is the citation to reach for when defending the methodology to a reviewer who's used to one of the above adjacent fields. Each community calibrates its own "equivalent fluid" parameters to its own dataset of past events, but the probabilistic-stacking machinery on top is identical.
 
-## Limitations
+## Notes on current iteration
 
-- **Small ensemble (N = 20).** Probability granularity is 5%; CIs on low-P contours are wide. Larger ensembles or surrogate-model emulators (Rutarindwa et al. 2019) would be the upgrade path.
-- **Friction is a placeholder.** Per-scenario μ/ξ are currently identical across scenarios — they are not yet derived from upstream snowpack state. Values bias toward longer runouts (conservative direction for road-impact analysis, but less informative as an actual probability).
-- **Entrainment is constant-depth.** Spatially-varying entrainment from snowpack output is the next upgrade.
-- **Conditional probability only.** Outputs are P(reach | scenarios). Annual or return-period probabilities require an external scenario-frequency model.
-- **Road buffer is uniform.** Future versions should support per-segment half-widths for variable road geometry.
+- **Small ensemble (N = 20).** Probability granularity is 5%; CIs on low-P contours are wide. Larger ensembles or surrogate-model emulators (Rutarindwa et al. 2019) would be the upgrade path. We chose a small ensemble for initial pipeline testing. 
+- **Friction is a placeholder.** Per-scenario μ/ξ are currently identical across scenarios. Values bias toward longer runouts.
+- **Entrainment is constant-depth.** Spatially varying entrainment from snowpack output is the next upgrade.
+- **Conditional probability only.** Outputs are P(reach | scenarios).
+- **Road buffer is uniform.** Current road layer is the centerline of the road sourced from CDOT. We set a 1m buffer on the centerline. Future versions should take in a road width attribute or dynamically adjust the buffer based on the number of lanes if information is available. 
