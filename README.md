@@ -22,14 +22,11 @@ python avalanche_runout.py --dry-run
 # Full run (parallel by default)
 python avalanche_runout.py
 
-# Re-run post-processing on existing simulation outputs
-python avalanche_runout.py --post-only
-
 # Run a single scenario for debugging
 python avalanche_runout.py --scenario scenario_001 --no-parallel --verbose
 ```
 
-All paths and parameters live in `config.yaml`. Per-scenario parameters (μ, ξ, ρ, release polygon, release depth) live under each `scenarios/scenario_NNN/inputs/` folder.
+All paths and parameters live in `config.yaml`. Per-scenario parameters (μ, ξ, ρ, release polygon, release depth) live under each `scenarios/scenario_NNN/` folder.
 
 ## Methods
 
